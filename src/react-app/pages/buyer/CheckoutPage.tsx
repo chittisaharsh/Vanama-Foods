@@ -21,13 +21,10 @@ export default function CheckoutPage() {
     0
   );
 
-  // ✅ Load Razorpay Script (ensures availability)
+  // ✅ Load Razorpay script dynamically
   const loadRazorpayScript = (): Promise<boolean> => {
     return new Promise((resolve) => {
-      if (window.Razorpay) {
-        resolve(true);
-        return;
-      }
+      if (window.Razorpay) return resolve(true);
       const script = document.createElement("script");
       script.src = "https://checkout.razorpay.com/v1/checkout.js";
       script.onload = () => resolve(true);
@@ -44,31 +41,35 @@ export default function CheckoutPage() {
     }
 
     try {
-      // 🔹 Ensure Razorpay script is loaded
+      // Load Razorpay script before using it
       const isLoaded = await loadRazorpayScript();
       if (!isLoaded) {
         showToast("⚠️ Failed to load Razorpay. Check your connection.", "error");
         return;
       }
 
-      // 🔹 Create Razorpay order via backend
+      // 🔹 Create Razorpay order (backend call)
       const response = await fetch("https://vanama-backend.onrender.com/create-order", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount: total }),
+        mode: "cors",
+        headers: {
+          "Accept": "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ amount: Number(total) }),
       });
 
       const orderData = await response.json();
       console.log("🧾 Razorpay order created:", orderData);
 
       if (!orderData.id) {
-        showToast("❌ Failed to create order. Please try again.", "error");
+        showToast("❌ Failed to create Razorpay order. Try again.", "error");
         return;
       }
 
-      // ✅ Razorpay options
+      // ✅ Configure Razorpay Checkout
       const options = {
-        key: "rzp_test_RUZAYqUISCIFD4", // your test key
+        key: "rzp_test_RUZAYqUISCIFD4",
         amount: orderData.amount,
         currency: orderData.currency,
         name: "Vanama Foods",
@@ -115,7 +116,7 @@ export default function CheckoutPage() {
     }
   };
 
-  // ✅ Handle Free Sample Orders
+  // ✅ Handle Sample Orders
   const handleOrderSamples = () => {
     if (!address.trim()) {
       showToast("🚨 Please enter a delivery address", "error");
@@ -139,7 +140,7 @@ export default function CheckoutPage() {
                 unit: "kg",
               },
             ],
-      total: 0, // Free sample
+      total: 0,
       paymentId: "SAMPLE_ORDER",
       date: new Date().toLocaleDateString(),
     };
