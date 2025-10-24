@@ -7,12 +7,16 @@ dotenv.config();
 
 const app = express();
 
-// ✅ Allow your Vercel frontend domain
+// ✅ Allow all origins during testing (use env var for prod safety)
 app.use(
   cors({
-    origin: ["https://vanama-food.vercel.app"],
+    origin: [
+      "https://vanama-food.vercel.app",
+      "http://localhost:5173", // for local Vite testing
+      "https://hoppscotch.io",
+      "*"
+    ],
     methods: ["GET", "POST"],
-    credentials: true,
   })
 );
 
@@ -47,13 +51,13 @@ app.post("/create-order", async (req, res) => {
   }
 });
 
-// ✅ Test route for quick debugging
+// ✅ Root route to verify Render is live
 app.get("/", (req, res) => {
-  res.send("🚀 Vanama backend is live and connected to Razorpay API!");
+  res.send("🚀 Vanama backend is live and ready for Razorpay integration!");
 });
 
-// ✅ Start Server
+// ✅ Dynamic PORT (Render requirement)
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT}`);
+  console.log(`✅ Server running on http://localhost:${PORT}`);
 });
