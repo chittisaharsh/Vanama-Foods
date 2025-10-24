@@ -7,40 +7,53 @@ dotenv.config();
 
 const app = express();
 
-// ✅ Parse incoming JSON before routes
-app.use(express.json());
+// ✅ Force JSON parsing even if headers aren't perfect
+app.use(express.json({ limit: "1mb", type: "application/json" }));
+app.use(express.urlencoded({ extended: true }));
 
-// ✅ Allow frontend + Hoppscotch
+// ✅ CORS configuration
 app.use(
   cors({
     origin: [
       "https://vanama-food.vercel.app",
       "http://localhost:5173",
       "https://hoppscotch.io",
-      "*",
+      "*"
     ],
     methods: ["GET", "POST"],
   })
 );
 
-// ✅ Razorpay Setup
+// ✅ Razorpay setup
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID || "rzp_test_RUZAYqUISCIFD4",
   key_secret: process.env.RAZORPAY_KEY_SECRET || "wivyPM4OQiSM3w40k4asVKam",
 });
 
-// ✅ Debug Route to Confirm req.body
+// ✅ Create Razorpay order
 app.post("/create-order", async (req, res) => {
   try {
-    console.log("🧾 Received body:", req.body); // 👈 Add this
+    console.log("🧾 Raw body:", req.body);
 
-    const { amount } = req.body;
-    if (!amount || amount <= 0) {
-      return res.status(400).json({ message: "Invalid amount" });
+    // Force parse in case body was stringified
+    let body = req.body;
+    if (typeof body === "string") {
+      try {
+        body = JSON.parse(body);
+      } catch (err) {
+        console.error("⚠️ Could not parse string body:", err.message);
+      }
+    }
+
+    const { amount } = body;
+    console.log("💰 Received amount:", amount);
+
+    if (!amount || isNaN(amount) || amount <= 0) {
+      return res.status(400).json({ message: "Invalid or missing amount" });
     }
 
     const order = await razorpay.orders.create({
-      amount: amount * 100, // amount in paise
+      amount: amount * 100, // paise
       currency: "INR",
       receipt: `receipt_${Date.now()}`,
     });
@@ -53,13 +66,11 @@ app.post("/create-order", async (req, res) => {
   }
 });
 
-// ✅ Root route for quick check
+// ✅ Root route
 app.get("/", (req, res) => {
-  res.send("🚀 Vanama backend is live and accepting JSON requests!");
+  res.send("🚀 Vanama backend is live and accepting orders!");
 });
 
-// ✅ Start Server
+// ✅ Dynamic port
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
