@@ -5,19 +5,20 @@ import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
 
+// ✅ Load environment variables
 dotenv.config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ✅ Setup Razorpay with .env variables (fallback to test keys)
+// ✅ Razorpay configuration
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID || "rzp_test_RUZAYqUISCIFD4",
   key_secret: process.env.RAZORPAY_KEY_SECRET || "wivyPM4OQiSM3w40k4asVKam",
 });
 
-// ✅ API Route to create Razorpay order
+// ✅ Create order endpoint
 app.post("/create-order", async (req, res) => {
   const { amount } = req.body;
 
@@ -35,18 +36,20 @@ app.post("/create-order", async (req, res) => {
   }
 });
 
-// ✅ Serve Frontend React Build
+// ✅ Serve the built React frontend (optional, if using same server)
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Serve the built files from frontend/dist
-app.use(express.static(path.join(__dirname, "frontend/dist")));
+const frontendPath = path.join(__dirname, "frontend", "dist");
+app.use(express.static(frontendPath));
 
-// Fallback to index.html for any unknown routes
-app.get("*", (req, res) => {
-  res.sendFile(path.resolve(__dirname, "frontend/dist", "index.html"));
+// ✅ Fix for Express 5 wildcard routing
+app.get("/*", (req, res) => {
+  res.sendFile(path.resolve(frontendPath, "index.html"));
 });
 
-// ✅ Dynamic port (for Render / Railway)
+// ✅ Start server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
+app.listen(PORT, () =>
+  console.log(`✅ Vanama server running on http://localhost:${PORT}`)
+);
