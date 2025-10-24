@@ -21,6 +21,22 @@ export default function CheckoutPage() {
     0
   );
 
+  // ✅ Load Razorpay Script (ensures availability)
+  const loadRazorpayScript = (): Promise<boolean> => {
+    return new Promise((resolve) => {
+      if (window.Razorpay) {
+        resolve(true);
+        return;
+      }
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
+  // ✅ Handle Checkout Payment
   const handleCheckout = async () => {
     if (!address.trim()) {
       showToast("🚨 Please enter a delivery address", "error");
@@ -28,20 +44,19 @@ export default function CheckoutPage() {
     }
 
     try {
-      // 🔹 Create Razorpay order (backend call)
-      //const response = await fetch("http://localhost:5000/create-order", {
-      //const response = await fetch("https://vanama-backend.onrender.com/create-order", {
-      // const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/create-order`, {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({ amount: total }),
-      // });
+      // 🔹 Ensure Razorpay script is loaded
+      const isLoaded = await loadRazorpayScript();
+      if (!isLoaded) {
+        showToast("⚠️ Failed to load Razorpay. Check your connection.", "error");
+        return;
+      }
+
+      // 🔹 Create Razorpay order via backend
       const response = await fetch("https://vanama-backend.onrender.com/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ amount: total }),
       });
-
 
       const orderData = await response.json();
       console.log("🧾 Razorpay order created:", orderData);
@@ -51,8 +66,9 @@ export default function CheckoutPage() {
         return;
       }
 
+      // ✅ Razorpay options
       const options = {
-        key: "rzp_test_RUZAYqUISCIFD4",
+        key: "rzp_test_RUZAYqUISCIFD4", // your test key
         amount: orderData.amount,
         currency: orderData.currency,
         name: "Vanama Foods",
@@ -65,7 +81,7 @@ export default function CheckoutPage() {
             id: `order_${Date.now()}`,
             buyerName: "Guest Buyer",
             address: address,
-            status: "Pending",
+            status: "Processing",
             items: state.items,
             total: total,
             paymentId: response.razorpay_payment_id,
@@ -83,12 +99,6 @@ export default function CheckoutPage() {
           contact: "9999999999",
         },
         theme: { color: "#059669" },
-        method: {
-          upi: true,
-          card: true,
-          netbanking: true,
-          wallet: true,
-        },
       };
 
       const razorpay = new window.Razorpay(options);
@@ -105,7 +115,7 @@ export default function CheckoutPage() {
     }
   };
 
-  // 🆕 Handle Sample Order
+  // ✅ Handle Free Sample Orders
   const handleOrderSamples = () => {
     if (!address.trim()) {
       showToast("🚨 Please enter a delivery address", "error");
@@ -115,20 +125,20 @@ export default function CheckoutPage() {
     const sampleOrder = {
       id: `sample_${Date.now()}`,
       buyerName: "Guest Buyer",
-      address: address,
+      address,
       status: "Processing",
       items:
         state.items.length > 0
           ? state.items
           : [
-            {
-              id: 1,
-              name: "Premium Basmati Rice",
-              price: 180,
-              quantity: 25,
-              unit: "kg",
-            },
-          ],
+              {
+                id: 1,
+                name: "Premium Basmati Rice",
+                price: 180,
+                quantity: 25,
+                unit: "kg",
+              },
+            ],
       total: 0, // Free sample
       paymentId: "SAMPLE_ORDER",
       date: new Date().toLocaleDateString(),
@@ -151,12 +161,10 @@ export default function CheckoutPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 to-white p-6">
       <div className="w-full max-w-md bg-white rounded-3xl shadow-xl border border-gray-100 p-8">
-        {/* Header */}
         <h1 className="text-3xl font-semibold text-gray-800 text-center mb-8">
           Checkout
         </h1>
 
-        {/* Address Section */}
         <div className="mb-8">
           <label className="block text-gray-700 font-medium mb-2">
             Delivery Address
@@ -170,7 +178,6 @@ export default function CheckoutPage() {
           />
         </div>
 
-        {/* Total Summary */}
         <div className="bg-emerald-50 border border-emerald-100 rounded-2xl px-5 py-4 mb-8 flex justify-between items-center">
           <span className="text-gray-700 text-lg font-medium">Total</span>
           <span className="text-2xl font-semibold text-emerald-700">
@@ -178,7 +185,6 @@ export default function CheckoutPage() {
           </span>
         </div>
 
-        {/* Buttons */}
         <div className="space-y-4">
           <button
             onClick={handleCheckout}
