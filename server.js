@@ -9,7 +9,15 @@ import { fileURLToPath } from "url";
 dotenv.config();
 
 const app = express();
-app.use(cors());
+
+// ✅ Enable CORS for frontend (Vercel)
+app.use(
+  cors({
+    origin: "*", // You can replace * with your Vercel domain for tighter security
+    methods: ["GET", "POST"],
+  })
+);
+
 app.use(express.json());
 
 // ✅ Razorpay configuration
@@ -18,44 +26,49 @@ const razorpay = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET || "wivyPM4OQiSM3w40k4asVKam",
 });
 
-// ✅ Create order endpoint
-app.post("/create-order", async (req, res) => {
-  const { amount } = req.body;
+// ✅ Health check route (for Render testing)
+app.get("/", (req, res) => {
+  res.send("🚀 Vanama backend is running successfully!");
+});
 
+// ✅ Create Razorpay order route
+app.post("/create-order", async (req, res) => {
   try {
+    const { amount } = req.body;
+
+    if (!amount) {
+      return res.status(400).json({ message: "Amount is required" });
+    }
+
     const order = await razorpay.orders.create({
-      amount: amount * 100, // amount in paise
+      amount: amount * 100, // convert to paise
       currency: "INR",
       receipt: `receipt_${Date.now()}`,
     });
 
-    res.json(order);
+    console.log("✅ Razorpay order created:", order.id);
+    res.status(200).json(order);
   } catch (err) {
     console.error("❌ Razorpay Error:", err);
     res.status(500).json({ message: "Error creating order" });
   }
 });
 
-// ✅ Serve the built React frontend (optional, if using same server)
+// ✅ Serve frontend (optional, for Render fullstack hosting)
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
 const frontendPath = path.join(__dirname, "frontend", "dist");
+
+// Only serve if frontend exists
 app.use(express.static(frontendPath));
 
-// // ✅ Fix for Express 5 wildcard routing
-// app.get("/*", (req, res) => {
-//   res.sendFile(path.resolve(frontendPath, "index.html"));
-// });
-
-// ✅ Fix for Express v5 — use regex instead of wildcard string
+// ✅ Fix for Express v5 — regex-based route for all other paths
 app.get(/.*/, (req, res) => {
   res.sendFile(path.resolve(frontendPath, "index.html"));
 });
 
-
 // ✅ Start server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () =>
-  console.log(`✅ Vanama server running on http://localhost:${PORT}`)
-);
+app.listen(PORT, () => {
+  console.log(`✅ Vanama server running on port ${PORT}`);
+});

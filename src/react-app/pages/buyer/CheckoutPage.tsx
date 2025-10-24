@@ -29,11 +29,19 @@ export default function CheckoutPage() {
 
     try {
       // 🔹 Create Razorpay order (backend call)
-      const response = await fetch("http://localhost:5000/create-order", {
+      //const response = await fetch("http://localhost:5000/create-order", {
+      //const response = await fetch("https://vanama-backend.onrender.com/create-order", {
+      // const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/create-order`, {
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify({ amount: total }),
+      // });
+      const response = await fetch("https://vanama-backend.onrender.com/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ amount: total }),
       });
+
 
       const orderData = await response.json();
       console.log("🧾 Razorpay order created:", orderData);
@@ -113,14 +121,14 @@ export default function CheckoutPage() {
         state.items.length > 0
           ? state.items
           : [
-              {
-                id: 1,
-                name: "Premium Basmati Rice",
-                price: 180,
-                quantity: 25,
-                unit: "kg",
-              },
-            ],
+            {
+              id: 1,
+              name: "Premium Basmati Rice",
+              price: 180,
+              quantity: 25,
+              unit: "kg",
+            },
+          ],
       total: 0, // Free sample
       paymentId: "SAMPLE_ORDER",
       date: new Date().toLocaleDateString(),
