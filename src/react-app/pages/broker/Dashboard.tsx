@@ -85,14 +85,14 @@ export default function BrokerDashboard() {
           icon={TrendingUp}
           iconColor="text-purple-600"
         />
-        <MetricCard
+        {/* <MetricCard
           title="Avg Order Value"
           value={`₹${(avgOrderValue / 1000).toFixed(0)}K`}
           change="+8.2%"
           changeType="increase"
           icon={Award}
           iconColor="text-orange-600"
-        />
+        /> */}
       </div>
 
       {/* Monthly Targets */}

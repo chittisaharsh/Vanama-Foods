@@ -19,7 +19,7 @@ const roleOptions = [
     key: 'buyer' as UserRole,
     title: 'Buyer',
     subtitle: 'Retailer / Wholesaler',
-    description: 'Purchase quality staples directly from mills',
+    description: 'Purchase quality staples directly from manufacturers',
     icon: Store,
     color: 'emerald',
     bgColor: 'bg-emerald-50',

@@ -51,10 +51,9 @@ export default function LandingPage({}: LandingPageProps) {
               Revolutionizing India's
               <span className="text-emerald-600 block">Staples Supply Chain</span>
             </h1>
-            {/* <p className="text-xl text-gray-600 mb-8 leading-relaxed">
-              Empowering India's food ecosystem by connecting mills directly to businesses, 
-              eliminating middlemen and ensuring trusted, affordable staples delivery.
-            </p> */}
+            <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+              Powering Bharat’s staples commerce — where trust meets technology in B2B trade.
+            </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button 
                 onClick={goToLogin}
@@ -117,12 +116,14 @@ export default function LandingPage({}: LandingPageProps) {
                 <div className="bg-white/10 rounded-xl p-6">
                   <Zap className="h-8 w-8 mb-4 mx-auto" />
                   <h4 className="text-xl font-semibold mb-3">Private Label Model</h4>
-                  <p className="text-emerald-100">Source staples from manufacturers, brand under "Vanama Foods", and sell with margins</p>
+                  {/* <p className="text-emerald-100">Source staples from manufacturers, brand under "Vanama Foods", and sell with margins</p> */}
+                  <p className="text-emerald-100">Source staples directly from verified manufacturers and farmers, brand them under “Vanama Foods”, and sell with healthy margins. Focus: Quality control, consistency, and strong brand value across India’s staple market</p>
                 </div>
                 <div className="bg-white/10 rounded-xl p-6">
                   <Star className="h-8 w-8 mb-4 mx-auto" />
                   <h4 className="text-xl font-semibold mb-3">Commission Marketplace</h4>
-                  <p className="text-emerald-100">Platform for manufacturers to list products directly, earning commissions on GMV</p>
+                  {/* <p className="text-emerald-100">Platform for manufacturers to list products directly, earning commissions on GMV</p> */}
+                  <p className="text-emerald-100">Enable manufacturers to list their products directly on the Vanama Foods platform. Earn commissions on GMV while offering buyers transparent pricing, easy procurement, and trusted logistics.</p>
                 </div>
               </div>
             </div>
@@ -159,27 +160,27 @@ export default function LandingPage({}: LandingPageProps) {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <div className="text-center bg-white rounded-xl p-8 shadow-sm">
-              <div className="text-4xl font-bold text-emerald-600 mb-2">₹50Cr+</div>
-              <div className="text-gray-900 font-semibold mb-1">Annual GMV</div>
-              <div className="text-gray-600 text-sm">Gross Merchandise Value processed</div>
+              <div className="text-4xl font-bold text-emerald-600 mb-2">$49B</div>
+              <div className="text-gray-900 font-semibold mb-1">TAM</div>
+              <div className="text-gray-600 text-sm"> Growing at 8-11% CAGR</div>
             </div>
             
             <div className="text-center bg-white rounded-xl p-8 shadow-sm">
-              <div className="text-4xl font-bold text-blue-600 mb-2">2,500+</div>
-              <div className="text-gray-900 font-semibold mb-1">Active Buyers</div>
-              <div className="text-gray-600 text-sm">Retailers, wholesalers, and HoReCa</div>
+              <div className="text-4xl font-bold text-blue-600 mb-2">$13B</div>
+              <div className="text-gray-900 font-semibold mb-1">SAM</div>
+              <div className="text-gray-600 text-sm">25% of TAM representing B2B channels</div>
             </div>
             
             <div className="text-center bg-white rounded-xl p-8 shadow-sm">
-              <div className="text-4xl font-bold text-purple-600 mb-2">150+</div>
-              <div className="text-gray-900 font-semibold mb-1">Partner Manufacturer</div>
-              <div className="text-gray-600 text-sm">Direct partnerships across India</div>
+              <div className="text-4xl font-bold text-purple-600 mb-2">$120M</div>
+              <div className="text-gray-900 font-semibold mb-1">SOM</div>
+              <div className="text-gray-600 text-sm">0.5% market share of SAM</div>
             </div>
             
             <div className="text-center bg-white rounded-xl p-8 shadow-sm">
-              <div className="text-4xl font-bold text-orange-600 mb-2">95%</div>
-              <div className="text-gray-900 font-semibold mb-1">Customer Satisfaction</div>
-              <div className="text-gray-600 text-sm">Quality and service excellence</div>
+              <div className="text-4xl font-bold text-orange-600 mb-2">15%</div>
+              <div className="text-gray-900 font-semibold mb-1">Profit Margin</div>
+              <div className="text-gray-600 text-sm">Selling product under private label</div>
             </div>
           </div>
 
@@ -235,11 +236,11 @@ export default function LandingPage({}: LandingPageProps) {
               <div className="flex space-x-4">
                 <div className="flex items-center space-x-2">
                   <Phone className="h-4 w-4" />
-                  <span className="text-sm">+91 98765 43210</span>
+                  <span className="text-sm">+91 76203 01929</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Mail className="h-4 w-4" />
-                  <span className="text-sm">hello@vanamafoods.com</span>
+                  <span className="text-sm">vanamafoods@gmail.com</span>
                 </div>
               </div>
             </div>
