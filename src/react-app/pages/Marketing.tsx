@@ -1,292 +1,435 @@
 import { useState } from 'react';
-import { TrendingUp, Target, Users, Plus, Search, Filter, Eye, Edit, Play, Pause } from 'lucide-react';
-import MetricCard from '@/react-app/components/MetricCard';
-import Chart from '@/react-app/components/Chart';
+import { Search, Filter, Star, ShoppingCart, MapPin, Plus, Minus, X } from 'lucide-react';
+import { useCart } from "@/react-app/context/CartContext";
+import { useNavigate } from "react-router-dom";  // ✅ Added this
+import bas from "@/assets/Basmati.png";
+import bro from "@/assets/brown_rice.png";
+import md from "@/assets/Moong_daal.png";
+import whe from "@/assets/Wheatflour.png";
+import toor from "@/assets/toor_daal.png";
+import mas from "@/assets/masoor_daal.png";
 
-// Mock data for marketing
-const campaigns = [
-  { id: 1, name: 'Spring Harvest 2024', type: 'Email', status: 'Active', budget: '$5,000', spend: '$3,250', startDate: '2024-01-01', endDate: '2024-03-31', impressions: 125000, clicks: 3750, conversions: 186, roi: '285%' },
-  { id: 2, name: 'Organic Awareness Drive', type: 'Social Media', status: 'Active', budget: '$8,500', spend: '$6,100', startDate: '2024-01-15', endDate: '2024-02-29', impressions: 89000, clicks: 2890, conversions: 142, roi: '198%' },
-  { id: 3, name: 'Health Food Expo', type: 'Event', status: 'Completed', budget: '$12,000', spend: '$11,750', startDate: '2023-12-01', endDate: '2023-12-31', impressions: 45000, clicks: 1250, conversions: 89, roi: '156%' },
-  { id: 4, name: 'Q1 Product Launch', type: 'PPC', status: 'Paused', budget: '$6,800', spend: '$2,450', startDate: '2024-01-08', endDate: '2024-04-08', impressions: 67000, clicks: 2100, conversions: 67, roi: '134%' },
-  { id: 5, name: 'Customer Retention', type: 'Email', status: 'Draft', budget: '$3,200', spend: '$0', startDate: '2024-02-01', endDate: '2024-04-30', impressions: 0, clicks: 0, conversions: 0, roi: '0%' },
+type CartItem = {
+  id: string;
+  name: string;
+  price: number;
+  unit: string;
+  minOrder: number;
+  quantity: number;
+  image?: string;
+};
+
+const products = [
+  {
+    id: 1, name: 'Premium Basmati Rice', seller: 'Suresh Rice Mills', location: 'Punjab',
+    price: 180, unit: 'tons', minOrder: 25, rating: 4.8, reviews: 156,
+    image: bas,
+    category: 'Rice', description: 'Premium quality aged basmati rice with long grains and aromatic fragrance.'
+  },
+  {
+    id: 2, name: 'Organic Toor Dal', seller: 'Green Valley Mills', location: 'Karnataka',
+    price: 95, unit: 'tons', minOrder: 50, rating: 4.6, reviews: 89,
+    image: toor,
+    category: 'Dal', description: 'Certified organic toor dal, rich in protein and free from chemicals.'
+  },
+  {
+    id: 3, name: 'Moong Dal Premium', seller: 'Rajasthan Agro Mills', location: 'Rajasthan',
+    price: 110, unit: 'tons', minOrder: 25, rating: 4.7, reviews: 203,
+    image: md,
+    category: 'Dal', description: 'High-quality moong dal with consistent size and excellent taste.'
+  },
+  {
+    id: 4, name: 'Whole Wheat Flour', seller: 'North India Mills', location: 'Haryana',
+    price: 45, unit: 'tons', minOrder: 100, rating: 4.5, reviews: 312,
+    image: whe,
+    category: 'Flour', description: 'Fresh whole wheat flour milled from premium quality wheat.'
+  },
+  {
+    id: 5, name: 'Masoor Dal', seller: 'Madhya Pradesh Traders', location: 'Madhya Pradesh',
+    price: 85, unit: 'tons', minOrder: 50, rating: 4.4, reviews: 167,
+    image: mas,
+    category: 'Dal', description: 'Premium quality masoor dal with rich color and taste.'
+  },
+  {
+    id: 6, name: 'Brown Rice Organic', seller: 'South Mills Co.', location: 'Tamil Nadu',
+    price: 120, unit: 'tons', minOrder: 25, rating: 4.9, reviews: 94,
+    image: bro,
+    category: 'Rice', description: 'Nutritious organic brown rice with high fiber content and healty for you.'
+  },
 ];
 
-const marketingMetrics = [
-  { name: 'Jan Week 1', leads: 145, conversions: 23, revenue: 12500 },
-  { name: 'Jan Week 2', leads: 168, conversions: 28, revenue: 15800 },
-  { name: 'Jan Week 3', leads: 192, conversions: 34, revenue: 18200 },
-  { name: 'Jan Week 4', leads: 178, conversions: 31, revenue: 16900 },
-];
+const categories = ['All', 'Rice', 'Dal', 'Flour', 'Oil', 'Spices'];
 
-const channelPerformance = [
-  { name: 'Email', value: 35, conversions: 186 },
-  { name: 'Social Media', value: 28, conversions: 142 },
-  { name: 'PPC', value: 22, conversions: 67 },
-  { name: 'Content', value: 15, conversions: 45 },
-];
-
-const leadSources = [
-  { source: 'Organic Search', leads: 245, conversionRate: '12.5%', value: '$28,750' },
-  { source: 'Email Campaigns', leads: 186, conversionRate: '18.2%', value: '$35,200' },
-  { source: 'Social Media', leads: 142, conversionRate: '8.9%', value: '$19,800' },
-  { source: 'Paid Search', leads: 89, conversionRate: '15.7%', value: '$22,100' },
-  { source: 'Referrals', leads: 67, conversionRate: '22.1%', value: '$31,500' },
-];
-
-export default function Marketing() {
+export default function Marketplace() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState('All');
-  const [filterType, setFilterType] = useState('All');
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [sortBy, setSortBy] = useState('name');
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
-  const filteredCampaigns = campaigns.filter(campaign => {
-    const matchesSearch = campaign.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = filterStatus === 'All' || campaign.status === filterStatus;
-    const matchesType = filterType === 'All' || campaign.type === filterType;
-    return matchesSearch && matchesStatus && matchesType;
-  });
+  const { state: cartState, dispatch } = useCart();
+  const cartItems: CartItem[] = (cartState.items as CartItem[]) || [];
+  const navigate = useNavigate(); // ✅ Hook to navigate to checkout page
 
-  const totalBudget = campaigns.reduce((sum, campaign) => {
-    return sum + parseFloat(campaign.budget.replace('$', '').replace(',', ''));
-  }, 0);
+  const filteredProducts = products
+    .filter(product => {
+      const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.seller.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesCategory = selectedCategory === 'All' || product.category === selectedCategory;
+      return matchesSearch && matchesCategory;
+    })
+    .sort((a, b) => {
+      if (sortBy === 'price') return a.price - b.price;
+      if (sortBy === 'rating') return b.rating - a.rating;
+      return a.name.localeCompare(b.name);
+    });
 
-  const totalSpend = campaigns.reduce((sum, campaign) => {
-    return sum + parseFloat(campaign.spend.replace('$', '').replace(',', ''));
-  }, 0);
+  const getQuantity = (id: string) => {
+    const item = cartItems.find(i => i.id === id);
+    return item ? item.quantity : 0;
+  };
 
-  const totalConversions = campaigns.reduce((sum, campaign) => sum + campaign.conversions, 0);
+  const getTotalItems = () => cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  const getTotalPrice = () => cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Marketing Management</h1>
-          <p className="text-gray-600 mt-1">Track campaigns, analyze performance, and optimize marketing ROI</p>
+          <h1 className="text-3xl font-bold text-gray-900">Marketplace</h1>
+          <p className="text-gray-600 mt-1">Discover quality staples directly from trusted mills</p>
         </div>
-        <button className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors flex items-center space-x-2">
-          <Plus className="h-4 w-4" />
-          <span>New Campaign</span>
-        </button>
+        {getTotalItems() > 0 && (
+          <button
+            onClick={() => setIsCartOpen(true)}
+            className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors flex items-center space-x-2"
+          >
+            <ShoppingCart className="h-4 w-4" />
+            <span>Cart ({getTotalItems()})</span>
+          </button>
+        )}
       </div>
 
-      {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <MetricCard
-          title="Total Budget"
-          value={`$${totalBudget.toLocaleString()}`}
-          change="+15.3%"
-          changeType="increase"
-          icon={Target}
-          iconColor="text-blue-600"
-        />
-        <MetricCard
-          title="Total Spend"
-          value={`$${totalSpend.toLocaleString()}`}
-          change="+12.8%"
-          changeType="increase"
-          icon={TrendingUp}
-          iconColor="text-green-600"
-        />
-        <MetricCard
-          title="Total Conversions"
-          value={totalConversions}
-          change="+18.5%"
-          changeType="increase"
-          icon={Users}
-          iconColor="text-purple-600"
-        />
-        <MetricCard
-          title="Average ROI"
-          value="218%"
-          change="+24.2%"
-          changeType="increase"
-          icon={TrendingUp}
-          iconColor="text-orange-600"
-        />
-      </div>
-
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Chart
-          type="line"
-          data={marketingMetrics}
-          dataKey="conversions"
-          xKey="name"
-          color="#10b981"
-          title="Weekly Conversion Trends"
-          height={300}
-        />
-        <Chart
-          type="bar"
-          data={channelPerformance}
-          dataKey="conversions"
-          xKey="name"
-          color="#3b82f6"
-          title="Channel Performance"
-          height={300}
-        />
-      </div>
-
-      {/* Lead Sources */}
+      {/* Search and Filters */}
       <div className="bg-white rounded-xl border border-gray-200 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Lead Sources Performance</h3>
-        <div className="space-y-4">
-          {leadSources.map((source, index) => (
-            <div key={source.source} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-              <div className="flex items-center space-x-4">
-                <span className="flex items-center justify-center w-8 h-8 bg-emerald-100 text-emerald-700 rounded-full text-sm font-medium">
-                  {index + 1}
-                </span>
-                <div>
-                  <p className="text-sm font-medium text-gray-900">{source.source}</p>
-                  <p className="text-sm text-gray-500">{source.leads} leads • {source.conversionRate} conversion rate</p>
-                </div>
-              </div>
-              <div className="text-right">
-                <p className="text-sm font-medium text-gray-900">{source.value}</p>
-                <p className="text-sm text-gray-500">Revenue generated</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Filters and Search */}
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
-          <div className="flex items-center space-x-4">
-            <div className="relative">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0 sm:space-x-4">
+          <div className="flex items-center space-x-4 flex-1">
+            <div className="relative flex-1 max-w-md">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <input
                 type="text"
-                placeholder="Search campaigns..."
+                placeholder="Search products or sellers..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 w-64"
+                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 w-full"
               />
             </div>
+          </div>
+
+          <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
               <Filter className="h-4 w-4 text-gray-400" />
-              <select 
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
                 className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
               >
-                <option value="All">All Status</option>
-                <option value="Active">Active</option>
-                <option value="Paused">Paused</option>
-                <option value="Completed">Completed</option>
-                <option value="Draft">Draft</option>
-              </select>
-              <select 
-                value={filterType}
-                onChange={(e) => setFilterType(e.target.value)}
-                className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-              >
-                <option value="All">All Types</option>
-                <option value="Email">Email</option>
-                <option value="Social Media">Social Media</option>
-                <option value="PPC">PPC</option>
-                <option value="Event">Event</option>
-                <option value="Content">Content</option>
+                {categories.map(category => (
+                  <option key={category} value={category}>{category}</option>
+                ))}
               </select>
             </div>
+
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+            >
+              <option value="name">Sort by Name</option>
+              <option value="price">Sort by Price</option>
+              <option value="rating">Sort by Rating</option>
+            </select>
           </div>
         </div>
       </div>
 
-      {/* Campaigns Table */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">Marketing Campaigns</h3>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Campaign</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Budget/Spend</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Performance</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ROI</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredCampaigns.map((campaign) => (
-                <tr key={campaign.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div>
-                      <div className="text-sm font-medium text-gray-900">{campaign.name}</div>
-                      <div className="text-sm text-gray-500">{campaign.startDate} - {campaign.endDate}</div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      campaign.type === 'Email' ? 'bg-blue-100 text-blue-800' :
-                      campaign.type === 'Social Media' ? 'bg-purple-100 text-purple-800' :
-                      campaign.type === 'PPC' ? 'bg-green-100 text-green-800' :
-                      campaign.type === 'Event' ? 'bg-orange-100 text-orange-800' :
-                      'bg-gray-100 text-gray-800'
-                    }`}>
-                      {campaign.type}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      campaign.status === 'Active' ? 'bg-green-100 text-green-800' :
-                      campaign.status === 'Paused' ? 'bg-yellow-100 text-yellow-800' :
-                      campaign.status === 'Completed' ? 'bg-blue-100 text-blue-800' :
-                      'bg-gray-100 text-gray-800'
-                    }`}>
-                      {campaign.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{campaign.spend} / {campaign.budget}</div>
-                    <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
-                      <div 
-                        className="bg-emerald-600 h-2 rounded-full" 
-                        style={{ 
-                          width: `${(parseFloat(campaign.spend.replace('$', '').replace(',', '')) / parseFloat(campaign.budget.replace('$', '').replace(',', ''))) * 100}%` 
-                        }}
-                      ></div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{campaign.conversions} conversions</div>
-                    <div className="text-sm text-gray-500">{campaign.impressions.toLocaleString()} impressions</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-sm font-medium text-green-600">{campaign.roi}</span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex space-x-2">
-                      <button className="text-blue-600 hover:text-blue-900" title="View">
-                        <Eye className="h-4 w-4" />
+      {/* Products Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredProducts.map((product) => {
+          const stringId = String(product.id);
+          const qty = getQuantity(stringId);
+          return (
+            <div key={product.id} className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-200">
+              <div className="relative">
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="w-full h-48 object-cover"
+                />
+                <div className="absolute top-4 right-4 bg-white rounded-full px-2 py-1 text-xs font-medium text-gray-700 shadow-sm">
+                  {product.category}
+                </div>
+              </div>
+
+              <div className="p-6">
+                <div className="flex items-start justify-between mb-2">
+                  <h3 className="text-lg font-semibold text-gray-900">{product.name}</h3>
+                  <div className="flex items-center space-x-1">
+                    <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                    <span className="text-sm text-gray-600">{product.rating}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-2 mb-2">
+                  <MapPin className="h-4 w-4 text-gray-400" />
+                  <span className="text-sm text-gray-600">{product.seller}, {product.location}</span>
+                </div>
+
+                <p className="text-sm text-gray-600 mb-4">{product.description}</p>
+
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <span className="text-2xl font-bold text-gray-900">₹{product.price}</span>
+                    <span className="text-gray-600">/{product.unit}</span>
+                  </div>
+                  <span className="text-xs text-gray-500">Min: {product.minOrder}{product.unit}</span>
+                </div>
+
+                {/* {qty > 0 ? (
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <button
+                        onClick={() => dispatch({ type: 'DECREMENT', id: stringId })}
+                        className="p-1 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+                      >
+                        <Minus className="h-4 w-4" />
                       </button>
-                      <button className="text-emerald-600 hover:text-emerald-900" title="Edit">
-                        <Edit className="h-4 w-4" />
+                      <span className="font-medium">{qty}{product.unit}</span>
+                      <button
+                        onClick={() => dispatch({ type: 'INCREMENT', id: stringId })}
+                        className="p-1 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+                      >
+                        <Plus className="h-4 w-4" />
                       </button>
-                      {campaign.status === 'Active' ? (
-                        <button className="text-yellow-600 hover:text-yellow-900" title="Pause">
-                          <Pause className="h-4 w-4" />
-                        </button>
-                      ) : campaign.status === 'Paused' ? (
-                        <button className="text-green-600 hover:text-green-900" title="Resume">
-                          <Play className="h-4 w-4" />
-                        </button>
-                      ) : null}
                     </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                    <div className="text-right">
+                      <div className="text-sm text-gray-600">Total</div>
+                      <div className="font-bold text-emerald-600">₹{(qty * product.price).toLocaleString()}</div>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => dispatch({
+                      type: 'ADD_ITEM',
+                      item: {
+                        id: stringId,
+                        name: product.name,
+                        price: product.price,
+                        quantity: product.minOrder,
+                        image: product.image,
+                      }
+                    })}
+                    className="w-full bg-emerald-600 text-white py-2 px-4 rounded-lg hover:bg-emerald-700 transition-colors flex items-center justify-center space-x-2"
+                  >
+                    <ShoppingCart className="h-4 w-4" />
+                    <span>Add to Cart</span>
+                  </button>
+                  <button
+                     className="w-full bg-emerald-600 text-white py-2 px-4 rounded-lg hover:bg-emerald-700 transition-colors flex items-center justify-center space-x-2"
+                  >
+                    <ShoppingCart className="h-4 w-4" />
+                    <span>Order Sample</span>
+                  </button>
+                )} */}
+                {qty > 0 ? (
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <button
+                        onClick={() => dispatch({ type: 'DECREMENT', id: stringId })}
+                        className="p-1 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+                      >
+                        <Minus className="h-4 w-4" />
+                      </button>
+                      <span className="font-medium">{qty}{product.unit}</span>
+                      <button
+                        onClick={() => dispatch({ type: 'INCREMENT', id: stringId })}
+                        className="p-1 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+                      >
+                        <Plus className="h-4 w-4" />
+                      </button>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm text-gray-600">Total</div>
+                      <div className="font-bold text-emerald-600">₹{(qty * product.price).toLocaleString()}</div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {/* ✅ Add to Cart Button */}
+                    <button
+                      onClick={() => dispatch({
+                        type: 'ADD_ITEM',
+                        item: {
+                          id: stringId,
+                          name: product.name,
+                          price: product.price,
+                          quantity: product.minOrder,
+                          image: product.image,
+                        }
+                      })}
+                      className="w-full bg-emerald-600 text-white py-2 px-4 rounded-lg hover:bg-emerald-700 transition-colors flex items-center justify-center space-x-2"
+                    >
+                      <ShoppingCart className="h-4 w-4" />
+                      <span>Add to Cart</span>
+                    </button>
+                    <button
+                      className="w-full border border-emerald-600 text-emerald-700 py-2 px-4 rounded-lg hover:bg-emerald-50 transition-colors flex items-center justify-center space-x-2"
+                    >
+                      <ShoppingCart className="h-4 w-4" />
+                      <span>Order Sample</span>
+                    </button>
+                  </div>
+                )}
+
+              </div>
+            </div>
+          );
+        })}
       </div>
+
+      {/* 🌿 Cart Drawer */}
+      {isCartOpen && (
+        <div className="fixed inset-0 bg-black/50 flex justify-end z-50 transition-all duration-300">
+          <div className="w-full md:w-1/2 h-full bg-gradient-to-b from-emerald-50 to-amber-50 backdrop-blur-lg shadow-2xl rounded-l-3xl p-6 flex flex-col animate-slideIn">
+            {/* Header */}
+            <div className="flex justify-between items-center mb-6 border-b border-amber-200 pb-3">
+              <div>
+                <h2 className="text-3xl font-bold text-emerald-800 flex items-center space-x-2">
+                  <span>🧺</span>
+                  <span>Your Cart</span>
+                </h2>
+                <p className="text-sm text-amber-800/70">Fresh from the farm, packed with care</p>
+              </div>
+              <button
+                onClick={() => setIsCartOpen(false)}
+                className="p-2 hover:bg-amber-100 rounded-full transition"
+                aria-label="Close cart"
+              >
+                <X className="h-6 w-6 text-emerald-700" />
+              </button>
+            </div>
+
+            {/* Cart Items */}
+            <div className="flex-1 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-amber-300 scrollbar-track-transparent">
+              {cartItems.length === 0 ? (
+                <p className="text-amber-800 text-center mt-16 text-lg">🧺 Your basket is empty</p>
+              ) : (
+                cartItems.map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex items-center justify-between bg-white/70 rounded-xl border border-amber-100 p-4 mb-4 shadow-sm hover:shadow-md transition-all"
+                  >
+                    <div className="flex items-center space-x-4">
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="w-20 h-20 object-cover rounded-lg border border-amber-200"
+                      />
+                      <div>
+                        <h3 className="font-semibold text-emerald-900">{item.name}</h3>
+                        <p className="text-sm text-amber-800/70">₹{item.price} × {item.quantity}</p>
+                        <p className="font-medium text-emerald-700 mt-1">
+                          ₹{(item.price * item.quantity).toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Quantity Controls */}
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => dispatch({ type: "DECREMENT", id: item.id })}
+                        className="p-1.5 rounded-full bg-amber-100 hover:bg-amber-200"
+                      >
+                        <Minus className="h-4 w-4 text-emerald-800" />
+                      </button>
+                      <span className="text-lg font-semibold text-emerald-900">{item.quantity}</span>
+                      <button
+                        onClick={() => dispatch({ type: "INCREMENT", id: item.id })}
+                        className="p-1.5 rounded-full bg-amber-100 hover:bg-amber-200"
+                      >
+                        <Plus className="h-4 w-4 text-emerald-800" />
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Recommended Products */}
+            {cartItems.length > 0 && (
+              <div className="mt-6 border-t border-amber-200 pt-4">
+                <h3 className="text-lg font-semibold text-emerald-900 mb-3">🌾 You might also like</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  {products
+                    .filter((p) => !cartItems.some((i) => i.id === String(p.id)))
+                    .slice(0, 2)
+                    .map((p) => (
+                      <div
+                        key={p.id}
+                        className="flex items-center bg-white/60 rounded-lg p-3 shadow-sm border border-amber-100 hover:shadow-md transition-all"
+                      >
+                        <img
+                          src={p.image}
+                          alt={p.name}
+                          className="w-14 h-14 rounded-lg object-cover border border-amber-200"
+                        />
+                        <div className="ml-3 flex-1">
+                          <p className="text-sm font-medium text-emerald-800">{p.name}</p>
+                          <p className="text-xs text-amber-800/70">₹{p.price}/{p.unit}</p>
+                        </div>
+                        <button
+                          onClick={() =>
+                            dispatch({
+                              type: "ADD_ITEM",
+                              item: {
+                                id: String(p.id),
+                                name: p.name,
+                                price: p.price,
+                                quantity: p.minOrder,
+                                image: p.image,
+                              },
+                            })
+                          }
+                          className="text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1 rounded-md"
+                        >
+                          Add
+                        </button>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )}
+
+            {/* Footer */}
+            <div className="border-t mt-6 pt-4 space-y-4">
+              <div className="flex justify-between items-center text-lg font-semibold text-emerald-900">
+                <span>Total</span>
+                <span>₹{getTotalPrice().toLocaleString()}</span>
+              </div>
+              <button
+                onClick={() => {
+                  setIsCartOpen(false);
+                  navigate("/checkout");
+                }}
+                className="w-full bg-emerald-700 hover:bg-emerald-800 text-white py-3 rounded-xl text-lg font-medium shadow-md hover:shadow-xl transition-all duration-200"
+              >
+                Proceed to Checkout
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
