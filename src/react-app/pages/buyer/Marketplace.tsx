@@ -195,7 +195,7 @@ export default function Marketplace() {
                   <span className="text-xs text-gray-500">Min: {product.minOrder}{product.unit}</span>
                 </div>
 
-                {qty > 0 ? (
+                {/* {qty > 0 ? (
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <button
@@ -233,9 +233,60 @@ export default function Marketplace() {
                   >
                     <ShoppingCart className="h-4 w-4" />
                     <span>Add to Cart</span>
-                    {/* <span>Order Samples</span> */}
                   </button>
+                )} */}
+                {qty > 0 ? (
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <button
+                        onClick={() => dispatch({ type: 'DECREMENT', id: stringId })}
+                        className="p-1 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+                      >
+                        <Minus className="h-4 w-4" />
+                      </button>
+                      <span className="font-medium">{qty}{product.unit}</span>
+                      <button
+                        onClick={() => dispatch({ type: 'INCREMENT', id: stringId })}
+                        className="p-1 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+                      >
+                        <Plus className="h-4 w-4" />
+                      </button>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm text-gray-600">Total</div>
+                      <div className="font-bold text-emerald-600">₹{(qty * product.price).toLocaleString()}</div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {/* ✅ Add to Cart Button */}
+                    <button
+                      onClick={() => dispatch({
+                        type: 'ADD_ITEM',
+                        item: {
+                          id: stringId,
+                          name: product.name,
+                          price: product.price,
+                          quantity: product.minOrder,
+                          image: product.image,
+                        }
+                      })}
+                      className="w-full bg-emerald-600 text-white py-2 px-4 rounded-lg hover:bg-emerald-700 transition-colors flex items-center justify-center space-x-2"
+                    >
+                      <ShoppingCart className="h-4 w-4" />
+                      <span>Add to Cart</span>
+                    </button>
+
+                    {/* 🆕 Order Sample Button (non-functional for now) */}
+                    <button
+                      className="w-full border border-emerald-600 text-emerald-700 py-2 px-4 rounded-lg hover:bg-emerald-50 transition-colors flex items-center justify-center space-x-2"
+                    >
+                      <ShoppingCart className="h-4 w-4" />
+                      <span>Order Sample</span>
+                    </button>
+                  </div>
                 )}
+
               </div>
             </div>
           );
