@@ -24,11 +24,15 @@ app.use(
   })
 );
 
+
+
+
 // ✅ Razorpay setup
 const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID || "rzp_test_RUZAYqUISCIFD4",
-  key_secret: process.env.RAZORPAY_KEY_SECRET || "wivyPM4OQiSM3w40k4asVKam",
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
+
 
 // ✅ Create Razorpay order
 app.post("/create-order", async (req, res) => {
