@@ -158,7 +158,7 @@ export default function LandingPage({}: LandingPageProps) {
             <p className="text-xl text-gray-600">Our platform is already transforming the staples supply chain</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <div className="text-center bg-white rounded-xl p-8 shadow-sm">
               <div className="text-4xl font-bold text-emerald-600 mb-2">$49B</div>
               <div className="text-gray-900 font-semibold mb-1">TAM</div>
@@ -175,12 +175,6 @@ export default function LandingPage({}: LandingPageProps) {
               <div className="text-4xl font-bold text-purple-600 mb-2">$120M</div>
               <div className="text-gray-900 font-semibold mb-1">SOM</div>
               <div className="text-gray-600 text-sm">0.5% market share of SAM</div>
-            </div>
-            
-            <div className="text-center bg-white rounded-xl p-8 shadow-sm">
-              <div className="text-4xl font-bold text-orange-600 mb-2">15%</div>
-              <div className="text-gray-900 font-semibold mb-1">Profit Margin</div>
-              <div className="text-gray-600 text-sm">Selling product under private label</div>
             </div>
           </div>
 
@@ -230,7 +224,7 @@ export default function LandingPage({}: LandingPageProps) {
                 <span className="text-xl font-bold">Vanama Foods</span>
               </div>
               <p className="text-gray-300 mb-6 max-w-md">
-                Revolutionizing India's staples supply chain by connecting mills directly to businesses, 
+                Revolutionizing India's staples supply chain by connecting manufacturers directly to businesses, 
                 ensuring quality, transparency, and fair pricing.
               </p>
               <div className="flex space-x-4">
