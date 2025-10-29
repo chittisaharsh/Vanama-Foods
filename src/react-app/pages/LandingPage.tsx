@@ -117,7 +117,7 @@ export default function LandingPage({}: LandingPageProps) {
                   <Zap className="h-8 w-8 mb-4 mx-auto" />
                   <h4 className="text-xl font-semibold mb-3">Private Label Model</h4>
                   {/* <p className="text-emerald-100">Source staples from manufacturers, brand under "Vanama Foods", and sell with margins</p> */}
-                  <p className="text-emerald-100">Source staples directly from verified manufacturers and farmers, brand them under “Vanama Foods”, and sell with healthy margins. Focus: Quality control, consistency, and strong brand value across India’s staple market</p>
+                  <p className="text-emerald-100">Vanama Foods partners directly with verified manufacturers and farmers to source premium-quality staples. Each product is crafted under the Vanama Foods brand, ensuring purity, consistency, and trust — building a strong, reliable presence across India’s staple market.</p>
                 </div>
                 <div className="bg-white/10 rounded-xl p-6">
                   <Star className="h-8 w-8 mb-4 mx-auto" />
