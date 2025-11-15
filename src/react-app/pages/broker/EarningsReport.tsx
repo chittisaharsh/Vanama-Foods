@@ -183,7 +183,7 @@ export default function EarningsReport() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-600 text-sm">Avg Commission Rate</p>
-              <p className="text-2xl font-bold text-blue-600">{avgCommissionRate.toFixed(1)}%</p>
+              <p className="text-2xl font-bold text-blue-600">1%</p>
               <p className="text-gray-500 text-sm mt-1">Across all orders</p>
             </div>
             <TrendingUp className="h-8 w-8 text-blue-600" />
